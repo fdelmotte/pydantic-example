@@ -37,6 +37,16 @@ class PowerSupply(BaseModel):
     outputCurrent: float
     managed: bool
 
+    def get_sensor(self, sensor_name: str) -> TempSensor:
+        if len([sensor for sensor in self.tempSensors if str(sensor.name) == sensor_name]) == 1:
+            return [sensor for sensor in self.tempSensors if str(sensor.name) == sensor_name][0]
+        return None
+
+    def get_fan(self, fan_name: str) -> TempSensor:
+        if len([sensor for sensor in self.fans if str(sensor.name) == fan_name]) == 1:
+            return [sensor for sensor in self.fans if str(sensor.name) == fan_name][0]
+        return None
+
 class DeviceModel():
 
     def __init__(self) -> None:
@@ -55,14 +65,17 @@ class DeviceModel():
             entry[key] = temp_list
         return entry
 
-    def load_psus_from_file(self, json_file: str):
+    def load_json_psus(self, json_file: str):
         for k,entry in self._load_json_file(json_file)['powerSupplies'].items():
             entry['id'] = int(k)
             entry = self._dict_to_list(entry=entry, key='tempSensors')
             entry = self._dict_to_list(entry=entry, key='fans')
-            pprint(entry)
             self.psus.append(PowerSupply(**entry))
 
+    def get_psu(self, psu_id: int):
+        if len([sensor for sensor in self.psus if int(sensor.id) == psu_id]) == 1:
+            return [sensor for sensor in self.psus if int(sensor.id) == psu_id][0]
+        return None
 
 
 if __name__ == '__main__':
@@ -71,6 +84,9 @@ if __name__ == '__main__':
     eos.load_psus_from_file(json_file='files/power_supply_result.json')
 
     for psu in eos.psus:
-        pprint(psu.dict())
+        pprint(psu.dict(), expand_all=False)
+
+    print('Getting information for PSU 2 sensor 2/3')
+    pprint(eos.get_psu(2).get_sensor(sensor_name='TempSensorP2/3').dict())
 
     sys.exit(0)
