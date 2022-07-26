@@ -6,7 +6,7 @@ import json
 import logging
 from rich import print
 from rich.pretty import pprint
-from typing import List, Optional
+from typing import List, Optional, Dict
 from pydantic import BaseModel
 
 def load_json_file(file_path: str):
@@ -18,7 +18,6 @@ class TempSensor(BaseModel):
     status: str
     temperature: str
 
-# To be added later
 class Fan(BaseModel):
     name: Optional[str]
     status: str
@@ -30,6 +29,7 @@ class PowerSupply(BaseModel):
     modelName: str
     capacity: int
     tempSensors: List[TempSensor]
+    fans: List[Fan]
     state: str
     inputCurrent: float
     dominant: bool
@@ -37,34 +37,40 @@ class PowerSupply(BaseModel):
     outputCurrent: float
     managed: bool
 
-class PowerSupplies():
+class DeviceModel():
 
     def __init__(self) -> None:
-        self.power_supplies = []
+        self.psus = []
 
     def _load_json_file(self, file_path: str):
         with open(file_path) as json_file:
             return json.load(json_file)
 
+    def _dict_to_list(self, entry: Dict, key: str):
+        if key in entry:
+            temp_list = []
+            for ct, sensor in entry[key].items():
+                sensor['name'] = ct
+                temp_list.append(sensor)
+            entry[key] = temp_list
+        return entry
+
     def load_psus_from_file(self, json_file: str):
         for k,entry in self._load_json_file(json_file)['powerSupplies'].items():
             entry['id'] = int(k)
-            if 'tempSensors' in entry:
-                temp_sensors_list = []
-                for ct, sensor in entry["tempSensors"].items():
-                    sensor['name'] = ct
-                    temp_sensors_list.append(sensor)
-                entry['tempSensors'] = temp_sensors_list
-            self.power_supplies.append(PowerSupply(**entry))
+            entry = self._dict_to_list(entry=entry, key='tempSensors')
+            entry = self._dict_to_list(entry=entry, key='fans')
+            pprint(entry)
+            self.psus.append(PowerSupply(**entry))
 
 
 
 if __name__ == '__main__':
 
-    power_supplies = PowerSupplies()
-    power_supplies.load_psus_from_file(json_file='files/power_supply_result.json')
+    eos = DeviceModel()
+    eos.load_psus_from_file(json_file='files/power_supply_result.json')
 
-    for psu in power_supplies.power_supplies:
+    for psu in eos.psus:
         pprint(psu.dict())
 
     sys.exit(0)
