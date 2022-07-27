@@ -85,12 +85,13 @@ class DeviceModel():
 if __name__ == '__main__':
 
     eos = DeviceModel()
-    eos.load_psus_from_file(json_file='files/power_supply_result.json')
+    eos.load_json_psus(json_file='files/show_env_power.json')
+    print(eos.psus)
 
     for psu in eos.psus:
         pprint(psu.dict(), expand_all=False)
 
-    print('Getting information for PSU 2 sensor 2/3')
-    pprint(eos.get_psu(2).get_sensor(sensor_name='TempSensorP2/3').dict())
+    # print('Getting information for PSU 2 sensor 2/3')
+    # pprint(eos.get_psu(2).get_sensor(sensor_name='TempSensorP2/3').dict())
 
     sys.exit(0)
