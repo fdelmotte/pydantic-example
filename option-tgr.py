@@ -49,8 +49,12 @@ class PowerSupply(BaseModel):
 
 class DeviceModel():
 
-    def __init__(self) -> None:
+    def __init__(self, hostname: str = 'demo.lab') -> None:
         self.psus = []
+        self.hostname = hostname
+
+    def __repr__(self):
+        return f'"{self.hostname}": {self.psus}'
 
     def _load_json_file(self, file_path: str):
         with open(file_path) as json_file:
