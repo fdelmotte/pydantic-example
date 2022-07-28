@@ -31,6 +31,8 @@ class PowerSupply(BaseModel):
     outputCurrent: Optional[float]
     managed: Optional[bool]
 
+class Aboot(BaseModel):
+    version: Optional[str]
 
 class Version(BaseModel):
     hostName: str
@@ -40,6 +42,7 @@ class Version(BaseModel):
     serialNumber: Optional[str]
     isIntlVersion: Optional[str]
     switchType: Optional[str]
+    aboot: Optional[List[Aboot]]
 
 
 class DeviceModel():
@@ -75,13 +78,14 @@ class DeviceModel():
                 entry = self._dict_to_list(entry=entry, key='fans')
                 self.psus.append(PowerSupply(**entry))
 
-
     def load_json_version(self, json_file: str):
         for device_hostname, value in self._load_json_file(json_file):
             entry = value[0]
             entry['hostName'] = device_hostname
             entry['switchType'] = entry.get('details').get('switchType')
-            entry['terminattr']= entry.get('details').get('packages').get('TerminAttr-core').get('version')
+            entry['terminattr'] = entry.get('details').get('packages').get('TerminAttr-core').get('version')
+            entry['aboot'] = [{"version": item.get('version').split('-')[2]} for item in
+                              entry.get('details').get('components') if item.get('name') == 'Aboot']
             self.versions.append(Version(**entry))
 
 if __name__ == '__main__':
