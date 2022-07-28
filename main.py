@@ -82,9 +82,10 @@ class DeviceModel():
 
 if __name__ == '__main__':
     eos = DeviceModel()
-    # eos.load_json_psus(json_file='files/show_env_power.json')
+    eos.load_json_psus(json_file='files/show_env_power.json')
     eos.load_json_version(json_file='files/devices_global.json')
 
+    print('EOS version information')
     pprint(eos.versions)
 
     # for psu in eos.psus:
