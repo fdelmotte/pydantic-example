@@ -1,6 +1,7 @@
 import json
 from pydantic import BaseModel
 from typing import Optional, List, Dict
+from rich import print
 from rich.pretty import pprint
 
 
@@ -74,16 +75,17 @@ class DeviceModel():
 
 
     def load_json_version(self, json_file: str):
-        for device_hostname, value in self._load_json_file(json_file):
-            for k, entry in value[0].items():
-                print("line : {}".format(type(entry)))
-                # entry['hostName'] = device_hostname
-            #     self.versions.append(Version(**entry))
+        for device_data in self._load_json_file(file_path=json_file):
+            entry = device_data[1][0]
+            entry['hostName'] = device_data[0]
+            self.versions.append(Version(**entry))
 
 if __name__ == '__main__':
     eos = DeviceModel()
-    eos.load_json_psus(json_file='files/show_env_power.json')
+    # eos.load_json_psus(json_file='files/show_env_power.json')
     eos.load_json_version(json_file='files/devices_global.json')
+
+    pprint(eos.versions)
 
     # for psu in eos.psus:
     #     pprint(psu.dict(), expand_all=False)
